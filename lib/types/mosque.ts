@@ -8,8 +8,8 @@ export type Mosque = {
   description?: string | null;
   logoUrl?: string | null;
 
-  latitude: number;
-  longitude: number;
+  latitude?: number | null;
+  longitude?: number | null;
   createdAt: Date;
   updatedAt: Date;
 };
