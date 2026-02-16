@@ -11,7 +11,6 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-  FormDescription,
 } from "@/components/ui/form";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import api from "@/lib/axios";
@@ -35,14 +34,14 @@ const DashboardPage = () => {
   const { isLoading } = useQuery({
     queryKey: ["mosque"],
     queryFn: async () => {
-      const { data } = await api.get("/mosque");
+      const { data } = await api.get("/admin/mosque");
       if (data) form.reset(data);
       return data;
     },
   });
 
   const mutation = useMutation({
-    mutationFn: (newMosque: Mosque) => api.post("/mosque", newMosque),
+    mutationFn: (newMosque: Mosque) => api.post("/admin/mosque", newMosque),
     onSuccess: () => toast.success("Data masjid berhasil disimpan!"),
     onError: () => toast.error("Gagal menyimpan data"),
   });
@@ -105,8 +104,8 @@ const DashboardPage = () => {
               <div className="md:col-span-2 space-y-3">
                 <FormLabel>Lokasi Geografis (Peta)</FormLabel>
                 <MapPicker
-                  lat={form.watch("latitude")}
-                  lng={form.watch("longitude")}
+                  lat={form.watch("latitude") ?? 0.507068}
+                  lng={form.watch("longitude") ?? 101.447779}
                   onChange={(lat, lng) => {
                     form.setValue("latitude", lat);
                     form.setValue("longitude", lng);
@@ -114,34 +113,6 @@ const DashboardPage = () => {
                 />
               </div>
             </div>
-
-            <FormField
-              control={form.control}
-              name="latitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Latitude</FormLabel>
-                  <FormControl>
-                    <Input type="number" step="any" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="longitude"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Longitude</FormLabel>
-                  <FormControl>
-                    <Input type="number" step="any" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <Button
               type="submit"

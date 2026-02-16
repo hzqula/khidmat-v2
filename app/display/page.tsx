@@ -18,7 +18,7 @@ const DisplayPage = () => {
   const { data: mosque, isLoading } = useQuery({
     queryKey: ["mosque-settings"],
     queryFn: async () => {
-      const { data } = await api.get("/mosque");
+      const { data } = await api.get("/public/mosque");
       return data;
     },
     refetchInterval: 600000, // Cek update tiap 10 menit
@@ -32,7 +32,7 @@ const DisplayPage = () => {
 
   // 3. Logic Perhitungan Jadwal (Adhan.js + Moment)
   const prayerData = useMemo(() => {
-    if (!mosque?.latitude || !mosque?.longitude) return null;
+    if (mosque?.latitude === null || mosque?.longitude === null) return null;
 
     const coords = new Coordinates(mosque.latitude, mosque.longitude);
     const params = CalculationMethod.Singapore(); // Standar Kemenag
