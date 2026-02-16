@@ -67,7 +67,7 @@ const RegisterForm = () => {
           <p className="text-center text-sm text-gray-600 mt-4">
             Sudah punya akun?{" "}
             <Link
-              href="/login"
+              href="/auth/login"
               className="text-emerald-600 hover:underline font-semibold"
             >
               Masuk di sini
