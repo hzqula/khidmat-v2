@@ -266,10 +266,11 @@ const DashboardPage = () => {
                   <FormLabel className="-mb-2">Latitude</FormLabel>
                   <FormControl className="border-none pl-1 py-0">
                     <Input
-                      className="borde-none shadow-none"
+                      className="border-none shadow-none bg-white text-black disabled:opacity-100"
                       {...field}
                       type="text"
                       readOnly
+                      disabled
                       value={field.value ?? ""}
                     />
                   </FormControl>
@@ -286,10 +287,11 @@ const DashboardPage = () => {
                   <FormLabel className="-mb-2">Longitude</FormLabel>
                   <FormControl className="border-none pl-1 py-0">
                     <Input
-                      className="borde-none shadow-none"
+                      className="border-none shadow-none bg-white text-black disabled:opacity-100"
                       {...field}
                       type="text"
                       readOnly
+                      disabled
                       value={field.value ?? ""}
                     />
                   </FormControl>
