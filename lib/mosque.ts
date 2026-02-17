@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 type MosqueInput = {
   name: string;
   address: string;
+  district: string;
   city: string;
   province: string;
   timezone: string;
@@ -15,6 +16,7 @@ type MosqueInput = {
 const DEFAULT_MOSQUE: MosqueInput = {
   name: "Masjid",
   address: "",
+  district: "",
   city: "",
   province: "",
   timezone: "Asia/Jakarta",

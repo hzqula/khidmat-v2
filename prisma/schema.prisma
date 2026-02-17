@@ -14,6 +14,7 @@ model Mosque {
   id       String @id @default(uuid())
   name     String
   address  String
+  district String
   city     String
   province String
 
