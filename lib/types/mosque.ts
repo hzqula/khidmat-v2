@@ -2,6 +2,7 @@ export type Mosque = {
   id: string;
   name: string;
   address: string;
+  district: string;
   city: string;
   province: string;
   timezone: string;
