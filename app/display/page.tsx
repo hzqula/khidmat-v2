@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { FaMosque, FaLocationDot, FaSun, FaCloudSun } from "react-icons/fa6";
 import { RiMoonClearFill } from "react-icons/ri";
 import { GiStripedSun } from "react-icons/gi";
-import { PiSunHorizonFill } from "react-icons/pi";
+import { PiNetworkSlash, PiSunHorizonFill } from "react-icons/pi";
 import Image from "next/image";
 import api from "@/lib/axios";
 import { Coordinates, CalculationMethod, PrayerTimes } from "adhan";
@@ -14,28 +14,30 @@ import moment from "moment-timezone";
 const DisplayPage = () => {
   const [now, setNow] = useState(new Date());
 
-  // 1. Fetch data masjid dari API yang sudah kamu buat
-  const { data: mosque, isLoading } = useQuery({
+  const {
+    data: mosque,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["mosque-settings"],
     queryFn: async () => {
       const { data } = await api.get("/public/mosque");
       return data;
     },
-    refetchInterval: 600000, // Cek update tiap 10 menit
+    refetchInterval: 600000,
   });
 
-  // 2. Real-time Clock
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(interval);
   }, []);
 
-  // 3. Logic Perhitungan Jadwal (Adhan.js + Moment)
   const prayerData = useMemo(() => {
-    if (mosque?.latitude === null || mosque?.longitude === null) return null;
+    if (!mosque || mosque?.latitude === null || mosque?.longitude === null)
+      return null;
 
     const coords = new Coordinates(mosque.latitude, mosque.longitude);
-    const params = CalculationMethod.Singapore(); // Standar Kemenag
+    const params = CalculationMethod.Singapore();
     params.fajrAngle = 20;
     params.ishaAngle = 18;
 
@@ -87,12 +89,60 @@ const DisplayPage = () => {
   const nextSholat =
     prayerData?.find((s) => s.waktu > currentTimeStr) || prayerData?.[0];
 
-  if (isLoading || !prayerData)
+  const locationLabel = [
+    mosque?.address,
+    mosque?.district,
+    mosque?.city,
+    mosque?.province,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
+  if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-emerald-900 text-white">
         Inisialisasi...
       </div>
     );
+  }
+
+  if (isError) {
+    return (
+      <div className="w-screen h-screen bg-linear-to-br from-emerald-950 via-emerald-900 to-teal-900 text-white flex items-center justify-center p-6">
+        <div className="max-w-2xl w-full bg-white/10 border border-white/20 backdrop-blur-md rounded-3xl p-8 md:p-10 text-center shadow-2xl">
+          <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-red-500/20 text-red-300 flex items-center justify-center text-4xl">
+            <PiNetworkSlash />
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">
+            Koneksi Bermasalah
+          </h2>
+          <p className="text-lg md:text-xl text-emerald-50 leading-relaxed">
+            Gagal memuat data masjid. Silakan cek API/public endpoint atau
+            koneksi jaringan perangkat display ini.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!prayerData) {
+    return (
+      <div className="w-screen h-screen bg-linear-to-br from-emerald-950 via-emerald-900 to-teal-900 text-white flex items-center justify-center p-6">
+        <div className="max-w-2xl w-full bg-white/10 border border-white/20 backdrop-blur-md rounded-3xl p-8 md:p-10 text-center shadow-2xl">
+          <div className="mx-auto mb-4 w-16 h-16 rounded-full bg-red-500/20 text-red-300 flex items-center justify-center text-4xl">
+            <PiNetworkSlash />
+          </div>
+          <h2 className="text-3xl md:text-4xl font-bold mb-3">
+            Koordinat belum diatur
+          </h2>
+          <p className="text-lg md:text-xl text-emerald-50 leading-relaxed">
+            Silakan buka dashboard admin lalu pilih lokasi pada peta agar jadwal
+            sholat dapat dihitung.
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-screen h-screen bg-white gap-0 flex flex-col overflow-hidden">
@@ -124,7 +174,7 @@ const DisplayPage = () => {
 
       {/* Main Content */}
       <div className="bg-white flex-1 grid grid-cols-[1.2fr_2.8fr] gap-0 min-h-0">
-        <div className="px-4 py-8 overflow-y-auto bg-gray-50/50">
+        <div className="px-6 py-8 overflow-y-auto bg-gray-50/50">
           <div className="flex flex-col gap-5">
             {prayerData.map((item) => {
               const isActive = nextSholat?.nama === item.nama;
@@ -160,7 +210,7 @@ const DisplayPage = () => {
         </div>
 
         {/* Image Slider Space */}
-        <div className="p-4 h-full w-full">
+        <div className="py-4 pr-4 h-full w-full">
           <div className="w-full h-full relative overflow-hidden rounded-2xl shadow-inner bg-gray-100 flex items-center justify-center border-2 border-gray-200">
             {mosque.logoUrl ? (
               <Image
