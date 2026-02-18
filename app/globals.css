@@ -151,3 +151,19 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes marquee-left {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.marquee-text {
+  display: inline-block;
+  min-width: max-content;
+  animation: marquee-left 30s linear infinite;
+  will-change: transform;
+}

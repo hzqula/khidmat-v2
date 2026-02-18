@@ -10,6 +10,7 @@ import Image from "next/image";
 import api from "@/lib/axios";
 import { Coordinates, CalculationMethod, PrayerTimes } from "adhan";
 import moment from "moment-timezone";
+import { Announcement } from "@/lib/types/announcement";
 
 const DisplayPage = () => {
   const [now, setNow] = useState(new Date());
@@ -25,6 +26,15 @@ const DisplayPage = () => {
       return data;
     },
     refetchInterval: 600000,
+  });
+
+  const { data: announcementItems } = useQuery<Announcement[]>({
+    queryKey: ["public-announcements"],
+    queryFn: async () => {
+      const { data } = await api.get("/public/announcements");
+      return data;
+    },
+    refetchInterval: 60000,
   });
 
   useEffect(() => {
@@ -89,15 +99,6 @@ const DisplayPage = () => {
   const nextSholat =
     prayerData?.find((s) => s.waktu > currentTimeStr) || prayerData?.[0];
 
-  const locationLabel = [
-    mosque?.address,
-    mosque?.district,
-    mosque?.city,
-    mosque?.province,
-  ]
-    .filter(Boolean)
-    .join(", ");
-
   if (isLoading) {
     return (
       <div className="h-screen flex items-center justify-center bg-emerald-900 text-white">
@@ -124,6 +125,13 @@ const DisplayPage = () => {
       </div>
     );
   }
+
+  const runningAnnouncementText =
+    announcementItems && announcementItems.length > 0
+      ? announcementItems
+          .map((announcement, index) => `${index + 1}. ${announcement.content}`)
+          .join("   ✦   ")
+      : `Selamat Datang di ${mosque?.name ?? "Masjid"} - Jagalah kebersihan masjid kita bersama.`;
 
   if (!prayerData) {
     return (
@@ -229,13 +237,28 @@ const DisplayPage = () => {
       </div>
 
       {/* Footer / Pengumuman */}
-      <div className="w-full h-16 border-t-2 border-gray-300 px-8 flex items-center bg-white">
-        <div className="bg-red-600 text-white px-4 py-1 rounded mr-4 font-bold">
-          INFO
+      <div className="w-full h-14 border-t-2 border-gold/30 flex items-center bg-emerald-deep overflow-hidden shrink-0">
+        {/* Label badge */}
+        <div className="shrink-0 h-full flex items-center">
+          <div className="bg-gold text-emerald-deep h-full px-6 flex items-center font-bold text-sm tracking-widest uppercase">
+            📢 Pengumuman
+          </div>
+          {/* Chevron arrow — tinggi harus pas dengan h-14 = 56px, jadi border-t/b = 28px */}
+          <div className="w-0 h-0 border-t-28 border-b-28 border-l-18 border-t-transparent border-b-transparent border-l-gold shrink-0" />
         </div>
-        <div className="text-2xl font-semibold text-gray-700">
-          Selamat Datang di {mosque.name} - Jagalah kebersihan masjid kita
-          bersama.
+
+        {/* Teks berjalan */}
+        <div className="relative flex-1 overflow-hidden h-full flex items-center pl-4">
+          <div
+            className="marquee-text text-base font-semibold text-white whitespace-nowrap"
+            style={{
+              animationDuration: `${Math.max(20, runningAnnouncementText.length * 0.12)}s`,
+            }}
+          >
+            {runningAnnouncementText}
+            &nbsp;&nbsp;&nbsp;&nbsp;✦&nbsp;&nbsp;&nbsp;&nbsp;
+            {runningAnnouncementText}
+          </div>
         </div>
       </div>
     </div>
