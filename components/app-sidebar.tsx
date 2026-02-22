@@ -9,17 +9,21 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Banknote, User2 } from "lucide-react";
+import { Banknote, LogOut } from "lucide-react";
 import Link from "next/link";
 import { RiSettings2Line } from "react-icons/ri";
 import { LuLayoutDashboard } from "react-icons/lu";
-
 import { FaRegNewspaper } from "react-icons/fa6";
 import { GoUpload } from "react-icons/go";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { logout } from "@/lib/actions/logout";
+import { useTransition } from "react";
+import { Loader2 } from "lucide-react";
 
 const AppSidebar = () => {
   const pathname = usePathname();
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const links = [
     { name: "Dashboard", href: "/dashboard", icon: <LuLayoutDashboard /> },
@@ -47,6 +51,12 @@ const AppSidebar = () => {
 
   const isActive = links.find((link) => link.href === pathname);
 
+  const handleLogout = () => {
+    startTransition(async () => {
+      await logout();
+    });
+  };
+
   return (
     <Sidebar>
       <SidebarHeader className="px-8 h-16 border-b justify-center">
@@ -68,11 +78,20 @@ const AppSidebar = () => {
           );
         })}
       </SidebarContent>
-      <SidebarFooter className="px-8">
+      <SidebarFooter className="px-4 py-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton>
-              <User2 /> Username
+            <SidebarMenuButton
+              onClick={handleLogout}
+              disabled={isPending}
+              className="text-red-600 hover:text-red-700 hover:bg-red-50 w-full cursor-pointer"
+            >
+              {isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <LogOut className="h-4 w-4" />
+              )}
+              <span>{isPending ? "Keluar…" : "Keluar"}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
